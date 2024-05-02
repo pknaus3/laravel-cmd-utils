@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use \App\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Hash;
 
@@ -10,7 +11,7 @@ class UserManagement extends Command
     protected $signature = "user:management";
     protected $description = "Utility to manage users with actions like edit,create,password reset";
 
-    public function handle()
+    public function handle(): void
     {
         $actionSelector = (int) $this->ask(
             "Witch action do you want to do?
@@ -26,7 +27,7 @@ class UserManagement extends Command
         };
     }
 
-    public function resetPassword()
+    public function resetPassword(): bool
     {
         $userModel = $this->getUser();
 
@@ -52,7 +53,7 @@ class UserManagement extends Command
         $this->info("Your password was successfuly changed!");
     }
 
-    public function updateUser(UserModel $userModel)
+    public function updateUser(User $userModel)
     {
         $userModel = $this->getUser();
     }
@@ -60,7 +61,7 @@ class UserManagement extends Command
     public function createUser()
     {
         $data = [];
-        $userFillable = (new UserModel())->getFillable();
+        $userFillable = (new User())->getFillable();
         foreach ($userFillable as $field) {
             if ($field === "password") {
                 $data[$field] = Hash::make(
@@ -71,7 +72,7 @@ class UserManagement extends Command
             $data[$field] = $this->ask("Insert your " . $field . ": ");
         }
 
-        $user = UserModel::query()->create($data);
+        $user = User::query()->create($data);
 
         if ($user) {
             $this->info("Your user was created succesfuly!");
@@ -84,7 +85,7 @@ class UserManagement extends Command
 
     public function getUser()
     {
-        $userFillable = (new UserModel())->getFillable();
+        $userFillable = (new User())->getFillable();
         unset($userFillable[array_search("password", $userFillable)]);
 
         $stringFillable = "";
@@ -100,7 +101,7 @@ class UserManagement extends Command
             "Insert " . $userFillable[$querySelector] . ": "
         ));
 
-        $user = UserModel::query()
+        $user = User::query()
             ->where([
                 $userFillable[$querySelector] => $searchTerm,
             ])
